@@ -1,2 +1,2 @@
 # NotaFiscal
- Lendo arquivos XML, usando como exemplo Nota Fiscal. Que no mundo real é extremamente usado e pode ser trabalhado com Python
+ Lendo notas fiscais no formato .XML, usando bibliotecas basicas do Python. Aplicação em dados ficticios mas que são parametros da realidade, com uso apenas de Python.
