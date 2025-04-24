@@ -1,59 +1,59 @@
+import os
 import xmltodict
 
-# Com esse codigo de 2 linhas você consegue um dicionário com todos os dados que quiser e como adicionar mais
-with open('NFs Finais/DANFEBrota.xml', 'rb') as arquivo:
-    documento = xmltodict.parse(arquivo)
+def extrair_dados_nfe(caminho_arquivo):
+    try:
+        with open(caminho_arquivo, 'rb') as arquivo:
+            documento = xmltodict.parse(arquivo)
 
-# Acessar caminho da arvore de um dicionário
-for item in documento:
-    print(item, '-\n')
+        infNFe = documento['nfeProc']['NFe']['infNFe']
+        emitente = infNFe['emit']
+        destinatario = infNFe.get('dest', {})
+        produtos = infNFe['det']
 
-for item in documento['nfeProc']:
-    print(item)
+        lista_produtos = []
+        for item in produtos:
+            prod = item['prod']
+            lista_produtos.append({
+                'nome': prod['xProd'],
+                'valor': prod['vProd']
+            })
 
-for item in documento['nfeProc']['protNFe']:
-    print(item, '-\n')
+        return {
+            'arquivo': os.path.basename(caminho_arquivo),
+            'valor_total': infNFe['total']['ICMSTot']['vNF'],
+            'cnpj_emitente': emitente.get('CNPJ'),
+            'nome_emitente': emitente.get('xNome'),
+            'empresa_fantasia': emitente.get('xFant'),
+            'cpf_destinatario': destinatario.get('CPF'),
+            'produtos': lista_produtos
+        }
 
-for item in documento['nfeProc']['NFe']['infNFe']['emit']:
-    print(item)
-
-dic_notafiscal = documento['nfeProc']['NFe']['infNFe']
-print(dic_notafiscal)
-
-valor_total = dic_notafiscal['total']['ICMSTot']['vNF']
-print(valor_total)
-
-
-# CNPJ e outras variáveis para objetificar os dados  - confere com o PDF
-cnjp_vendeu = dic_notafiscal['emit']['CNPJ']
-nome_vendeu = dic_notafiscal['emit']['xNome']
-cpf_comprou = dic_notafiscal['dest']['CPF']
-empresa = dic_notafiscal['emit']['xFant']
-
-
-produtos = dic_notafiscal['det']
-
-
-lista_produtos = []
-for produto in produtos:
-    valor_produto = produto['prod']['vProd']
-    nome_produto = produto['prod']['xProd']
-    lista_produtos.append((nome_produto, valor_produto))
-    print(valor_produto, nome_produto)
+    except Exception as e:
+        print(f"Erro ao processar {caminho_arquivo}: {e}")
+        return None
 
 
+def processar_pasta(pasta):
+    resultados = []
+    for arquivo in os.listdir(pasta):
+        if arquivo.endswith('.xml'):
+            caminho = os.path.join(pasta, arquivo)
+            dados = extrair_dados_nfe(caminho)
+            if dados:
+                resultados.append(dados)
+    return resultados
 
 
-# Até chegar no arquivo que sejar
-print(documento['nfeProc']['NFe']['infNFe']['ide']['cUF'])
-
-# valor total, produtos ou serviço, cnpj_vendeu, cpf/cnpj_comprou, nome_comprou - producurar no XML
-
-resposta = {'valor_total': valor_total,
-            'cnjp_vendeu': cnjp_vendeu,
-            'nome_vendeu': nome_vendeu, 
-            'empresa': empresa, 
-            'cpf_comprou': cpf_comprou,
-            'lista_produtos': lista_produtos}
-            
-print(resposta)
+if __name__ == "__main__":
+    pasta_xml = "NFs Finais"
+    notas = processar_pasta(pasta_xml)
+    
+    for nota in notas:
+        print(f"\n📄 Nota: {nota['arquivo']}")
+        print(f"Empresa: {nota['nome_emitente']} ({nota['cnpj_emitente']})")
+        print(f"Cliente (CPF): {nota['cpf_destinatario']}")
+        print(f"Valor Total: R$ {nota['valor_total']}")
+        print("Produtos:")
+        for p in nota['produtos']:
+            print(f"  - {p['nome']}: R$ {p['valor']}")
