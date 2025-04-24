@@ -29,3 +29,37 @@ Instale as dependências com:
 pip install -r requirements.txt
 ```
 
+---
+
+## 🧾 Exemplo de Saída
+
+📄 Nota: DANFEBrota.xml
+Empresa: Empresa Exemplo LTDA (12345678000199)
+Cliente (CPF): 98765432100
+Valor Total: R$ 150.00
+Produtos:
+  - Produto A: R$ 50.00
+  - Produto B: R$ 100.00
+
+---
+
+## 📂 Estrutura de Pastas
+
+```nginx
+NFs Finais/
+├── DANFEBrota.xml
+├── NF001.xml
+└── ...
+```
+
+---
+
+
+## ✅ Como Usar
+1. Coloque todos os arquivos XML na pasta NFs Finais.
+
+2. Execute o script:
+
+```bash
+python leitor_nfe.py
+```
